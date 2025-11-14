@@ -14,55 +14,88 @@ st.set_page_config(
 st.markdown("""
 <style>
     .stApp {
-        background-color: #FFFFFF;
+        background-color: #0D1117;
+        color: #C9D1D9;
     }
     .main-header {
         text-align: center;
         padding: 2rem 0;
-        background-color: #FFFFFF;
+        background-color: #0D1117;
     }
     .motto {
         font-style: italic;
-        color: #4F46E5;
+        color: #58A6FF;
         font-size: 1.3rem;
         font-weight: 500;
         text-align: center;
+        text-shadow: 0 0 10px rgba(88, 166, 255, 0.3);
     }
     .grade-display {
         text-align: center;
         font-size: 4rem;
         font-weight: bold;
-        color: #4F46E5;
+        color: #00FF00;
         padding: 2rem 0;
-        background-color: #FFFFFF;
+        background-color: #0D1117;
+        text-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        font-family: 'Courier New', monospace;
     }
     .found-class {
-        background-color: #D1FAE5;
-        color: #065F46;
+        background-color: #1F6E43;
+        color: #3FB950;
         padding: 0.5rem 1rem;
-        border-radius: 1rem;
+        border-radius: 0.5rem;
         margin: 0.25rem;
         display: inline-block;
         font-size: 0.9rem;
+        font-family: 'Courier New', monospace;
+        border: 1px solid #3FB950;
+        box-shadow: 0 0 5px rgba(63, 185, 80, 0.3);
     }
     .missing-class {
-        background-color: #FEE2E2;
-        color: #991B1B;
+        background-color: #5A1E1E;
+        color: #F85149;
         padding: 0.5rem 1rem;
-        border-radius: 1rem;
+        border-radius: 0.5rem;
         margin: 0.25rem;
         display: inline-block;
         font-size: 0.9rem;
+        font-family: 'Courier New', monospace;
+        border: 1px solid #F85149;
+        box-shadow: 0 0 5px rgba(248, 81, 73, 0.3);
     }
     .suggestion-box {
-        background-color: #DBEAFE;
-        border-left: 4px solid #3B82F6;
+        background-color: #161B22;
+        border-left: 4px solid #58A6FF;
         padding: 1rem;
         border-radius: 0.5rem;
         margin: 1rem 0;
+        box-shadow: 0 0 10px rgba(88, 166, 255, 0.2);
     }
     div[data-testid="stForm"] {
-        background-color: #FFFFFF;
+        background-color: #0D1117;
+    }
+    /* Additional tech-vibe styling */
+    h1, h2, h3 {
+        color: #58A6FF !important;
+        font-family: 'Courier New', monospace;
+    }
+    .stTextInput input {
+        background-color: #161B22 !important;
+        color: #C9D1D9 !important;
+        border: 1px solid #30363D !important;
+        font-family: 'Courier New', monospace;
+    }
+    .stButton button {
+        background-color: #238636 !important;
+        color: #FFFFFF !important;
+        border: 1px solid #2EA043 !important;
+        font-family: 'Courier New', monospace;
+        box-shadow: 0 0 10px rgba(46, 160, 67, 0.4);
+    }
+    .stButton button:hover {
+        background-color: #2EA043 !important;
+        box-shadow: 0 0 15px rgba(46, 160, 67, 0.6);
     }
 </style>
 """, unsafe_allow_html=True)
