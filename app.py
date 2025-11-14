@@ -126,8 +126,8 @@ def check_bootstrap_classes(html_content):
     missing_classes = []
     
     for class_name in REQUIRED_CLASSES:
-        # Use regex to find class in class attributes
-        pattern = rf'class=["' + "'][^\"']*\\b" + re.escape(class_name) + r"\\b[^\"']*[\"']"
+        # Use regex to find class in class attributes - look for the class name as a whole word
+        pattern = rf'class=["\'][^"\']*\b' + re.escape(class_name) + r'\b[^"\']*["\']'
         if re.search(pattern, html_content):
             found_classes.append(class_name)
         else:
