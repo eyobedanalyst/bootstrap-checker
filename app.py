@@ -10,12 +10,16 @@ st.set_page_config(
     layout="centered"
 )
 
-# Custom CSS
+# Custom CSS with white background
 st.markdown("""
 <style>
+    .stApp {
+        background-color: #FFFFFF;
+    }
     .main-header {
         text-align: center;
         padding: 2rem 0;
+        background-color: #FFFFFF;
     }
     .motto {
         font-style: italic;
@@ -30,6 +34,7 @@ st.markdown("""
         font-weight: bold;
         color: #4F46E5;
         padding: 2rem 0;
+        background-color: #FFFFFF;
     }
     .found-class {
         background-color: #D1FAE5;
@@ -55,6 +60,9 @@ st.markdown("""
         padding: 1rem;
         border-radius: 0.5rem;
         margin: 1rem 0;
+    }
+    div[data-testid="stForm"] {
+        background-color: #FFFFFF;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -124,20 +132,60 @@ def generate_suggestions(missing_classes, grade):
     
     return suggestions
 
-def fetch_github_html(username):
-    """Fetch index.html from GitHub Pages repository"""
+def fetch_html_from_url(url):
+    """Fetch HTML content from a given URL"""
     try:
-        url = f"https://raw.githubusercontent.com/{username}/{username}.github.io/main/index.html"
-        response = requests.get(url, timeout=10)
+        # Clean the URL
+        url = url.strip()
         
-        if response.status_code == 200:
-            return response.text, None
+        # If it's a GitHub Pages URL, convert to raw content URL
+        if 'github.io' in url:
+            # Extract username and repo from GitHub Pages URL
+            # Example: https://username.github.io/repo/ or https://username.github.io/
+            parts = url.replace('https://', '').replace('http://', '').split('/')
+            username = parts[0].replace('.github.io', '')
+            
+            # Try different possible paths for index.html
+            possible_paths = [
+                f"https://raw.githubusercontent.com/{username}/{username}.github.io/main/index.html",
+                f"https://raw.githubusercontent.com/{username}/{username}.github.io/master/index.html",
+            ]
+            
+            # If there's a repo path in the URL
+            if len(parts) > 1 and parts[1]:
+                repo = parts[1]
+                possible_paths.insert(0, f"https://raw.githubusercontent.com/{username}/{repo}/main/index.html")
+                possible_paths.insert(1, f"https://raw.githubusercontent.com/{username}/{repo}/master/index.html")
+            
+            # Try each possible path
+            for path in possible_paths:
+                try:
+                    response = requests.get(path, timeout=10)
+                    if response.status_code == 200:
+                        return response.text, None
+                except:
+                    continue
+            
+            return None, "Could not fetch index.html from any of the attempted paths"
+        
+        # For direct raw GitHub URLs or other URLs
         else:
-            return None, f"Could not fetch index.html (Status code: {response.status_code})"
+            # Ensure it's a raw GitHub URL if it's a GitHub link
+            if 'github.com' in url and 'raw.githubusercontent.com' not in url:
+                url = url.replace('github.com', 'raw.githubusercontent.com')
+                url = url.replace('/blob/', '/')
+            
+            response = requests.get(url, timeout=10)
+            
+            if response.status_code == 200:
+                return response.text, None
+            else:
+                return None, f"Could not fetch HTML (Status code: {response.status_code})"
+                
     except requests.exceptions.Timeout:
         return None, "Request timed out. Please try again."
     except requests.exceptions.RequestException as e:
-        return None, f"Error fetching repository: {str(e)}"
+        return None, f"Error fetching URL: {str(e)}"
 
 # Header
 st.markdown('<div class="main-header">', unsafe_allow_html=True)
@@ -150,35 +198,38 @@ st.markdown('</div>', unsafe_allow_html=True)
 with st.container():
     st.markdown("### 📋 Student Information")
     
-    col1, col2 = st.columns(2)
+    student_name = st.text_input("👤 Student Name", placeholder="Enter your full name")
     
-    with col1:
-        student_name = st.text_input("👤 Student Name", placeholder="Enter your full name")
+    github_url = st.text_input(
+        "🔗 GitHub Public Link (where index.html is located)", 
+        placeholder="e.g., https://username.github.io or https://raw.githubusercontent.com/.../index.html"
+    )
     
-    with col2:
-        github_username = st.text_input("🐙 GitHub Username", placeholder="Enter your GitHub username")
-    
-    if github_username:
-        st.info(f"📍 Will check: `https://github.com/{github_username}/{github_username}.github.io`")
+    st.info("""
+    **Accepted URL formats:**
+    - GitHub Pages: `https://username.github.io`
+    - GitHub Pages with repo: `https://username.github.io/repo-name`
+    - Direct raw link: `https://raw.githubusercontent.com/username/repo/main/index.html`
+    """)
     
     submit_button = st.button("📝 Submit for Grading", type="primary", use_container_width=True)
 
 # Process submission
 if submit_button:
-    if not student_name.strip() or not github_username.strip():
-        st.error("⚠️ Please enter both your name and GitHub username!")
+    if not student_name.strip() or not github_url.strip():
+        st.error("⚠️ Please enter both your name and GitHub public link!")
     else:
         with st.spinner("🔍 Fetching and analyzing your code..."):
-            html_content, error = fetch_github_html(github_username.strip())
+            html_content, error = fetch_html_from_url(github_url.strip())
             
             if error:
                 st.error(f"❌ **Error:** {error}")
                 st.warning("""
                 **Make sure:**
-                1. Your GitHub username is correct
-                2. You have a repository named `{username}.github.io`
-                3. There's an `index.html` file in the `main` branch
-                4. The repository is public
+                1. Your URL is correct and publicly accessible
+                2. The repository/page contains an `index.html` file
+                3. The repository is public (not private)
+                4. You're using one of the accepted URL formats shown above
                 """)
             else:
                 # Check classes
@@ -233,7 +284,6 @@ if submit_button:
 st.markdown("---")
 st.markdown("""
 <div style='text-align: center; color: #6B7280; padding: 2rem 0;'>
-    <p><strong>Note:</strong> Make sure your GitHub repository is public and named as <code>username.github.io</code> 
-    with an <code>index.html</code> file in the main branch.</p>
+    <p><strong>Tip:</strong> You can use your GitHub Pages URL, repository URL, or direct raw link to your index.html file.</p>
 </div>
 """, unsafe_allow_html=True)
